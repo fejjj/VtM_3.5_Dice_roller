@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>&#129499; VtM 3.5 Dice Roller &#129499;</title>
+  <HTA:APPLICATION
+    icon="calc.exe"
+    SELECTION="no"
+    APPLICATIONNAME="VtM3.5DiceRoller"
+    CONTEXTMENU="no"
+    ID=oHTA/>
+  <style>
+    body {
+      color: red;
+      background: #1a0000;
+      font-family: Tahoma;
+      font-size:15px;
+    }
+    #dpTd {
+      border: 1px solid grey;
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    #rollTable td {
+      border: none;
+      padding-left: 3px;
+      padding-right: 3px;
+      zoom:140%;
+    }
+    #diceTable {
+      zoom:140%;
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    th, td {
+      border: 1px solid grey;
+      text-align: center;
+    }
+  </style>
+  <script>
+    window.resizeTo(415, 530);
+    function defaults() {
+      document.getElementById("vtmPool").value = 5;
+      document.getElementById("vtmDiff").value = 6;
+      rollTable.innerHTML = "<table><tr><td style=\"padding-left:10px; visibility:hidden;\">S</td></tr></table>"
+    }
+    function isWN(value) {
+      for (var i = 0; i < value.length; i++) {
+        if (isNaN(parseInt(value.charAt(i), 10))) { return false; }
+      }
+      return true;
+    }
+    function rollDice() {
+      output.innerHTML = "";
+      rollTable.innerHTML = "<table><tr><td style=\"padding-left:10px; visibility:hidden;\">S</td></tr></table>"
+      error.innerHTML = "";
+      var vtmPool = document.getElementById("vtmPool").value;
+      var vtmDiff = document.getElementById("vtmDiff").value;
+      var vtmBotch = 0;
+      var vtmSucc = 0;
+      if (!isWN(vtmPool) || !isWN(vtmDiff)) {
+        error.innerHTML = "Error: Dice Pool/Difficulty must be Whole Numbers.";
+        return;
+      }
+      vtmPool = parseInt(vtmPool);
+      vtmDiff = parseInt(vtmDiff);
+      if (vtmPool > 500) { error.innerHTML = "Error: Dice Pool may not exceed 500."; return; }
+      if (vtmDiff > 500) { error.innerHTML = "Error: Difficulty may not exceed 500."; return; }
+      var HTML = "<table>";
+      for (var i = 1; i <= vtmPool; i++) {
+        eval("var roll" + i + "=" + eval(Math.floor(Math.random() * 10) + 1) + ";");
+        if (eval("roll" + i) === 1) { vtmBotch++; }
+      }
+      vtmDiff += vtmBotch;
+      HTML += "<th id=\"diceTable\">Die #</th><th id=\"diceTable\">Roll</th><th id=\"diceTable\">Outcome</th>"
+
+      for (var i = 1; i <= vtmPool; i++) {
+        if (eval("roll" + i) >= vtmDiff) {
+          HTML += "<tr><td id=\"diceTable\"><span style=\"color:white;\">&#127922;</span>&nbsp;&nbsp;&nbsp;" + i + "</td><td id=\"diceTable\">" + eval("roll" + i) + "</td><td  id=\"diceTable\" style=\"color:green;\">&#10004;</td></tr>";
+          vtmSucc++
+        } else {
+          HTML += "<tr><td id=\"diceTable\"><span style=\"color:white;\">&#127922;</span>&nbsp;&nbsp;&nbsp;" + i + "</td><td id=\"diceTable\">" + eval("roll" + i) + "</td><td id=\"diceTable\">&#10060;</td></tr>";
+        }
+      }
+      if (vtmSucc === 0 && vtmBotch >= 1) {
+        vtmTotal = "<span style=\"color:white;\">&#x1F480;</span>";
+      } else {
+        if (eval(vtmSucc - vtmBotch) <= 0) {
+          vtmTotal = 0 + "<span style=\"color:white; visibility:hidden;\">&#x1F480;</span>";
+        } else {
+          vtmTotal = eval(vtmSucc - vtmBotch) + "<span style=\"color:white; visibility:hidden;\">&#x1F480;</span>";
+        }
+      }
+      HTML += "</table>";
+      rollTable.innerHTML = "<table><tr><td style=\"padding-left:5px;\">Success: </td><td>" + vtmSucc + "</td><td style=\"padding-left: 10px;\">Botch: </td><td>" + vtmBotch + "</td><td style=\"padding-left:10px;\">Total: </td><td>" + vtmTotal + "</td></tr></table>";
+      output.innerHTML = HTML;
+    }
+  </script>
+</head>
+<body onload="defaults();" onkeydown="if (event.keyCode === 13) { roll.click(); }">
+  <h1></h1>
+  <table style=border="0">
+    <tr>
+      <td>
+        <table>
+          <tr>
+            <td id="dpTd"><label for="vtmPool">Dice Pool:</label></td>
+            <td id="dpTd">
+              <input
+              type="number"
+              id="vtmPool"
+              value="5"
+              min="1"
+              onkeydown="if (event.keyCode === 13) { roll.click(); }">
+            </td>
+          </tr>
+      <tr>
+        <td id="dpTd"><label for="vtmDiff">Difficulty:</label></td>
+        <td id="dpTd">
+          <input
+            type="number"
+            id="vtmDiff"
+            value="6"
+            min="0"
+            onkeydown="if (event.keyCode === 13) { roll.click(); }">
+          </td>
+        </tr>
+        </table>
+      <td style="padding-right:3px; padding-left:3px;"><button style="padding:1px; zoom:200%;" id="roll" onclick="rollDice()">Roll</button></td>
+    </table>
+  <div style="padding-top:10px;padding-bottom:10px;" id="rollTable"></div>
+  <div id="output"></div>
+  <span id="error"></span>
+</body>
+</html>
